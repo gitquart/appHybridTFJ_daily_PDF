@@ -9,6 +9,7 @@ class cInternalControl:
     download_dir='Download_'+version
     hfolder=version  
     rutaHeroku='/app/'+hfolder
+    #Ruta de archivos en worspace
     rutaLocal=os.getcwd()+'\\'+hfolder+'\\'
     
     

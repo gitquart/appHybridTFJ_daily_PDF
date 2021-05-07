@@ -112,11 +112,17 @@ def processRows(browser,row):
                 time.sleep(5)
                 pdfButton=browser.find_elements_by_xpath('//*[@id="dtRresul_data"]/tr['+str(row)+']/td['+str(col)+']')[0]
                 pdfButton.click()
-                time.sleep(100)
+                #Check recursively if a file downloaded
+                bDownloaded=checkIfPDFisDownloaded(False)
                 #The file is downloaded rare, then just renaming it solves the issue
-                for file in os.listdir(download_dir):
+                if bDownloaded:
                     pdfDownloaded=True
-                    os.rename(download_dir+'/'+file,download_dir+'/00000.pdf')
+                    for file in os.listdir(download_dir):
+                        if objControl.heroku:
+                            os.rename(download_dir+'/'+file,download_dir+'/00000.pdf')
+                        else:
+                            os.rename('C:\\'+download_dir+'\\'+file,'C:\\'+download_dir+'\\00000.pdf')
+
             else:
                 print('The pdf process is turned off now...')        
                
@@ -168,7 +174,22 @@ def processRows(browser,row):
             processPDF(json_sentencia)   
             for file in os.listdir(download_dir):
                 os.remove(download_dir+'/'+file)  
-              
+
+
+def checkIfPDFisDownloaded(bRes):
+    rutaFolder=''
+    if objControl.heroku:
+        rutaFolder=objControl.rutaHeroku+'/'+objControl.download_dir
+    else:
+        rutaFolder='C:\\'+objControl.download_dir    
+    if os.listdir(rutaFolder):    
+        return True
+    else:
+        checkIfPDFisDownloaded(False)      
+
+
+
+
                     
 """
 readPDF is done to read a PDF no matter the content, can be image or UTF-8 text
@@ -215,6 +236,10 @@ def devuelveJSON(jsonFile):
     return jsonObj 
 
 def processPDF(json_sentencia):
+    """
+    Docs:processPDF
+    This process already sets a list of 20 items (the nice limit in cassandra list)
+    """
     lsContent=[]  
     for file in os.listdir(download_dir): 
         strFile=file.split('.')[1]
@@ -225,7 +250,7 @@ def processPDF(json_sentencia):
             totalElements=len(lsContent)
             insertPDFChunks(0,0,0,totalElements,lsContent,json_sentencia)       
            
-        
+             
 def insertPDFChunks(startPos,contador,secuencia,totalElements,lsContent,json_documento):
     json_documento['lspdfcontent'].clear()
     for i in range(startPos,totalElements):
@@ -276,7 +301,7 @@ def returnChromeSettings():
     else:
         options = Options()
         profile = {"plugins.plugins_list": [{"enabled": True, "name": "Chrome PDF Viewer"}], # Disable Chrome's PDF Viewer
-               "download.default_directory": objControl.download_dir , 
+               "download.default_directory": 'C:\\'+objControl.download_dir , 
                "download.prompt_for_download": False,
                "download.directory_upgrade": True,
                "download.extensions_to_open": "applications/pdf",
