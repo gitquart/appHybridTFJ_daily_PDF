@@ -16,10 +16,11 @@ def returnCluster():
     objCC=CassandraConnection()
     cloud_config={}
     secure_connect_zip=''
+    secure_zip='secure-connect-dbtest_serverless.zip'
     if objControl.heroku:
-        secure_connect_zip=objControl.rutaHeroku+'/secure-connect-dbtest_serverless.zip'
+        secure_connect_zip=objControl.rutaHeroku+'/'+secure_zip
     else:
-        secure_connect_zip= objControl.rutaLocal+'secure-connect-dbtest.zip'
+        secure_connect_zip= objControl.rutaLocal+secure_zip
 
     cloud_config['secure_connect_bundle']=secure_connect_zip
     cloud_config['init-query-timeout']=10 

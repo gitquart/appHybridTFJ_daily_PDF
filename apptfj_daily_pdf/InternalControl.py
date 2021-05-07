@@ -1,12 +1,13 @@
 import os
 
 class cInternalControl:
-    idControl=8
+    idControl=9
     timeout=70
     heroku=False
-    pdfOn=False
-    download_dir='Download_tfja_Daily'
-    hfolder='apptfj_daily_3'   
+    pdfOn=True
+    version='apptfj_daily_pdf'
+    download_dir='Download_'+version
+    hfolder=version  
     rutaHeroku='/app/'+hfolder
     rutaLocal=os.getcwd()+'\\'+hfolder+'\\'
     
