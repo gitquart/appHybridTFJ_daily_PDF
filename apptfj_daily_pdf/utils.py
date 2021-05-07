@@ -73,35 +73,37 @@ processRows:
 
 def processRows(browser,row):
     pdfDownloaded=False
+    #For this version of code, the only fields to read are: num_exp, pdfname,pdf file
     for col in range(1,16):
         if col==2:
             numExp=browser.find_elements_by_xpath('//*[@id="dtRresul_data"]/tr['+str(row)+']/td['+str(col)+']')[0].text
-        if col==3:
-            viaTram=browser.find_elements_by_xpath('//*[@id="dtRresul_data"]/tr['+str(row)+']/td['+str(col)+']')[0].text
-        if col==4:
-            tipoJuicio=browser.find_elements_by_xpath('//*[@id="dtRresul_data"]/tr['+str(row)+']/td['+str(col)+']')[0].text
-        if col==5:
-            fechaPres=browser.find_elements_by_xpath('//*[@id="dtRresul_data"]/tr['+str(row)+']/td['+str(col)+']')[0].text
-        if col==6:
-            resolImp=browser.find_elements_by_xpath('//*[@id="dtRresul_data"]/tr['+str(row)+']/td['+str(col)+']')[0].text
-        if col==7:
-            leyQueFunda=browser.find_elements_by_xpath('//*[@id="dtRresul_data"]/tr['+str(row)+']/td['+str(col)+']')[0].text
-        if col==8:
-            sentDeLaSent=browser.find_elements_by_xpath('//*[@id="dtRresul_data"]/tr['+str(row)+']/td['+str(col)+']')[0].text
-        if col==9:
-            subject=browser.find_elements_by_xpath('//*[@id="dtRresul_data"]/tr['+str(row)+']/td['+str(col)+']')[0].text
+        #if col==3:
+            #viaTram=browser.find_elements_by_xpath('//*[@id="dtRresul_data"]/tr['+str(row)+']/td['+str(col)+']')[0].text
+        #if col==4:
+            #tipoJuicio=browser.find_elements_by_xpath('//*[@id="dtRresul_data"]/tr['+str(row)+']/td['+str(col)+']')[0].text
+        #if col==5:
+            #fechaPres=browser.find_elements_by_xpath('//*[@id="dtRresul_data"]/tr['+str(row)+']/td['+str(col)+']')[0].text
+        #if col==6:
+            #resolImp=browser.find_elements_by_xpath('//*[@id="dtRresul_data"]/tr['+str(row)+']/td['+str(col)+']')[0].text
+        #if col==7:
+            #leyQueFunda=browser.find_elements_by_xpath('//*[@id="dtRresul_data"]/tr['+str(row)+']/td['+str(col)+']')[0].text
+        #if col==8:
+            #sentDeLaSent=browser.find_elements_by_xpath('//*[@id="dtRresul_data"]/tr['+str(row)+']/td['+str(col)+']')[0].text
+        #if col==9:
+            #subject=browser.find_elements_by_xpath('//*[@id="dtRresul_data"]/tr['+str(row)+']/td['+str(col)+']')[0].text
         if col==10:
             sub_subject=browser.find_elements_by_xpath('//*[@id="dtRresul_data"]/tr['+str(row)+']/td['+str(col)+']')[0].text
-        if col==11:
-            region=browser.find_elements_by_xpath('//*[@id="dtRresul_data"]/tr['+str(row)+']/td['+str(col)+']')[0].text
-        if col==12:
-            court=browser.find_elements_by_xpath('//*[@id="dtRresul_data"]/tr['+str(row)+']/td['+str(col)+']')[0].text
-        if col==13:
-            title=browser.find_elements_by_xpath('//*[@id="dtRresul_data"]/tr['+str(row)+']/td['+str(col)+']')[0].text
+        #if col==11:
+            #region=browser.find_elements_by_xpath('//*[@id="dtRresul_data"]/tr['+str(row)+']/td['+str(col)+']')[0].text
+        #if col==12:
+            #court=browser.find_elements_by_xpath('//*[@id="dtRresul_data"]/tr['+str(row)+']/td['+str(col)+']')[0].text
+        #if col==13:
+            #title=browser.find_elements_by_xpath('//*[@id="dtRresul_data"]/tr['+str(row)+']/td['+str(col)+']')[0].text
         if col==14:
             namePDF=browser.find_elements_by_xpath('//*[@id="dtRresul_data"]/tr['+str(row)+']/td['+str(col)+']')[0].text
-        if col==15:
-            dt_date=browser.find_elements_by_xpath('//*[@id="dtRresul_data"]/tr['+str(row)+']/td['+str(col)+']')[0].text
+        #if col==15:
+            #dt_date=browser.find_elements_by_xpath('//*[@id="dtRresul_data"]/tr['+str(row)+']/td['+str(col)+']')[0].text
+            
         
         if (objControl.pdfOn):
             if col==1:
@@ -116,7 +118,7 @@ def processRows(browser,row):
                     pdfDownloaded=True
                     os.rename(download_dir+'/'+file,download_dir+'/00000.pdf')
             else:
-                print('The pdf process are turned off now...')        
+                print('The pdf process is turned off now...')        
                
 
     
@@ -129,45 +131,39 @@ def processRows(browser,row):
     #Start of JSON filled
     json_sentencia['id']=str(uuid.uuid4())
     json_sentencia['num_exp']=numExp.replace("'"," ")
-    json_sentencia['via_tramit']=viaTram.replace("'"," ")
-    json_sentencia['type_judge']=tipoJuicio.replace("'"," ")
-    json_sentencia['dt_demandfeature']=fechaPres.replace("'"," ")
-    json_sentencia['resolimpugnada']=str(resolImp).replace("'"," ")
-    json_sentencia['ley_base_res_impug']=leyQueFunda.replace("'"," ")
-    json_sentencia['sentido_sent']=sentDeLaSent.replace("'"," ")
-    json_sentencia['subject']=subject.replace("'"," ")
-    json_sentencia['sub_subject']=sub_subject.replace("'"," ")
-    json_sentencia['region']=region.replace("'"," ")
-    json_sentencia['court_room']=court.replace("'"," ")
-    json_sentencia['title']=title.replace("'"," ")
+    #json_sentencia['via_tramit']=viaTram.replace("'"," ")
+    #json_sentencia['type_judge']=tipoJuicio.replace("'"," ")
+    #json_sentencia['dt_demandfeature']=fechaPres.replace("'"," ")
+    #json_sentencia['resolimpugnada']=str(resolImp).replace("'"," ")
+    #json_sentencia['ley_base_res_impug']=leyQueFunda.replace("'"," ")
+    #json_sentencia['sentido_sent']=sentDeLaSent.replace("'"," ")
+    #json_sentencia['subject']=subject.replace("'"," ")
+    #json_sentencia['sub_subject']=sub_subject.replace("'"," ")
+    #json_sentencia['region']=region.replace("'"," ")
+    #json_sentencia['court_room']=court.replace("'"," ")
+    #json_sentencia['title']=title.replace("'"," ")
     json_sentencia['pdfname']=namePDF.replace("'"," ")
     #Working with the date, this field will deliver:
     #1.Date field,2. StrField and 3.year
     # timestamp accepted for cassandra: 
     # yyyy-mm-dd  , yyyy-mm-dd HH:mm:ss
     #In web site, the date comes as 27-10-2020 14:38:00
-    data=''
-    data=dt_date.split(' ')
-    dDate=str(data[0]).split('-')
-    dDay=dDate[0]
-    dMonth=dDate[1]
-    dYear=dDate[2]
-    dTime=data[1]
-    fullTimeStamp=dYear+'-'+dMonth+'-'+dDay+' '+dTime;
-    json_sentencia['year']=int(dYear)
-    json_sentencia['publication_datetime']=fullTimeStamp
-    json_sentencia['strpublicationdatetime']=fullTimeStamp                  
+    #data=''
+    #data=dt_date.split(' ')
+    #dDate=str(data[0]).split('-')
+    #dDay=dDate[0]
+    #dMonth=dDate[1]
+    #dYear=dDate[2]
+    #dTime=data[1]
+    #fullTimeStamp=dYear+'-'+dMonth+'-'+dDay+' '+dTime;
+    #json_sentencia['year']=int(dYear)
+    #json_sentencia['publication_datetime']=fullTimeStamp
+    #json_sentencia['strpublicationdatetime']=fullTimeStamp                  
                    
-    #Insert information to cassandra
-    lsRes=bd.cassandraBDProcess(json_sentencia)
-
-    if lsRes[0]:
-        print('Sentencia added:',str(namePDF))         
-    else:
-        print('Keep going...sentencia existed:',str(namePDF)) 
 
     #First the metadata of document is inserted, then the PDF, hence the PDF must be validated by chunks
     if (objControl.pdfOn):
+        #The metadata and pdf content is inserted in the same table
         if pdfDownloaded==True:
             processPDF(json_sentencia)   
             for file in os.listdir(download_dir):
@@ -226,17 +222,12 @@ def processPDF(json_sentencia):
             strContent=readPDF(file) 
             print('Start wrapping text...') 
             lsContent=wrap(strContent,1000)  
-            json_documento=devuelveJSON('json_documento.json')
-            json_documento['idDocumento']=json_sentencia['id']
-            json_documento['documento']=json_sentencia['pdfname']
-            json_documento['fuente']='tfjfa'
             totalElements=len(lsContent)
-            insertPDFChunks(0,0,0,totalElements,lsContent,json_documento)       
+            insertPDFChunks(0,0,0,totalElements,lsContent,json_sentencia)       
            
         
 def insertPDFChunks(startPos,contador,secuencia,totalElements,lsContent,json_documento):
     json_documento['lspdfcontent'].clear()
-    json_documento['id']=str(uuid.uuid4())
     for i in range(startPos,totalElements):
         if contador<=20:
             json_documento['lspdfcontent'].append(lsContent[i])
