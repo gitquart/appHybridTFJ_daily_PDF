@@ -123,8 +123,8 @@ def processRows(browser,row):
                     else:
                         os.rename(completeDownloadFolder+'\\'+file,completeDownloadFolder+'\\00000.pdf')
 
-            else:
-                print('The pdf process is turned off now...')        
+        else:
+            print('The pdf process is turned off now...')        
                
 
     
@@ -135,7 +135,6 @@ def processRows(browser,row):
     else:
         json_sentencia=devuelveJSON(objControl.rutaLocal+'json_sentencia.json')             
     #Start of JSON filled
-    json_sentencia['id']=str(uuid.uuid4())
     json_sentencia['num_exp']=numExp.replace("'"," ")
     #json_sentencia['via_tramit']=viaTram.replace("'"," ")
     #json_sentencia['type_judge']=tipoJuicio.replace("'"," ")
@@ -185,8 +184,13 @@ def processRows(browser,row):
 """
 readPDF is done to read a PDF no matter the content, can be image or UTF-8 text
 """
-def readPDF(file):  
-    with open(download_dir+'/'+file, "rb") as pdf_file:
+def readPDF(file):
+    separador=''
+    if objControl.heroku:
+        separador='/'
+    else:
+        separador='\\'      
+    with open(completeDownloadFolder+separador+file, "rb") as pdf_file:
         bContent = base64.b64encode(pdf_file.read()).decode('utf-8')
     
     return bContent  
@@ -257,11 +261,15 @@ def insertPDFChunks(startPos,contador,secuencia,totalElements,lsContent,json_doc
             secuencia=str(json_documento['secuencia'])
             query="select id from test.tbcourtdecisiontfjfa_pdf where pdfname='"+pdfname+"' and num_exp='"+num_exp+"' and secuencia="+secuencia+" ALLOW FILTERING"
             resQuery=bd.getQuery(query)
-            if resQuery is None:
+            if resQuery:
+                print('The chunk already exists')
+            else:    
+                #If the pdf name, expedient name and sequence doesn't exist, then create the UUID to insert
+                json_documento['id']=str(uuid.uuid4())
                 resInsert=bd.insertJSON(json_documento,'tbcourtdecisiontfjfa_pdf') 
                 if resInsert:
                     print('Chunk of pdf added')  
-            insertPDFChunks(i,0,currentSeq,totalElements,lsContent,json_documento) 
+                    insertPDFChunks(i,0,currentSeq,totalElements,lsContent,json_documento) 
     print('PDF COMPLETE')         
        
                     
