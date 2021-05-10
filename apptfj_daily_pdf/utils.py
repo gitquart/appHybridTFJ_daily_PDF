@@ -114,9 +114,9 @@ def processRows(browser,row):
                 pdfButton=browser.find_elements_by_xpath('//*[@id="dtRresul_data"]/tr['+str(row)+']/td['+str(col)+']')[0]
                 pdfButton.click()
                 #Wait some time until the file is downloaded
-                time.sleep(100)
+                time.sleep(15)
                 #The file is downloaded rare, then just renaming it solves the issue
-                for file in os.listdir(download_dir):
+                for file in os.listdir(completeDownloadFolder):
                     pdfDownloaded=True
                     if objControl.heroku:
                         os.rename(completeDownloadFolder+'/'+file,completeDownloadFolder+'/00000.pdf')
@@ -258,7 +258,7 @@ def insertPDFChunks(startPos,contador,secuencia,totalElements,lsContent,json_doc
             query="select id from test.tbcourtdecisiontfjfa_pdf where pdfname='"+pdfname+"' and num_exp='"+num_exp+"' and secuencia="+secuencia+" ALLOW FILTERING"
             resQuery=bd.getQuery(query)
             if resQuery is None:
-                resInsert=bd.insertJSON(json_documento,tbcourtdecisiontfjfa_pdf) 
+                resInsert=bd.insertJSON(json_documento,'tbcourtdecisiontfjfa_pdf') 
                 if resInsert:
                     print('Chunk of pdf added')  
             insertPDFChunks(i,0,currentSeq,totalElements,lsContent,json_documento) 
