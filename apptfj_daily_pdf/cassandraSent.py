@@ -76,8 +76,6 @@ def insertJSON(json_doc,table):
 
 
 class CassandraConnection():
-    cc_user='quartadmin'
-    cc_pwd='P@ssw0rd33'
     cc_user_test='MpvtYRWPigKTDLxfcZMNIfYQ'
     cc_pwd_test='joFIPwAoFL_JWNsgAr,xTNf30gZpZu3Fg6,eMxQjKxm-Gz5Uva2R.ELwwzj88f4XPePGhXLWU89xzzP8a1BdgSpwLN+iPHhQpjRmXnvA-cbmvoK_In8Sr,MGadqF+TAh'
         

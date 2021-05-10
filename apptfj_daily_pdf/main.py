@@ -93,7 +93,7 @@ if status==200:
            
             
     print('Waiting a bit just to let the page get up well...')
-    time.sleep(5)        
+    time.sleep(20)        
     print('Start reading the page...')
     #Control the page
     #Page identention
