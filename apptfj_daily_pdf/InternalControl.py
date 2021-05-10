@@ -1,6 +1,6 @@
 import os
 
-class cInternalControl:
+class cInternalControl(object):
     idControl=9
     timeout=70
     heroku=False
@@ -11,5 +11,6 @@ class cInternalControl:
     rutaHeroku='/app/'+hfolder
     #Ruta de archivos en worspace
     rutaLocal=os.getcwd()+'\\'+hfolder+'\\'
+        
     
     

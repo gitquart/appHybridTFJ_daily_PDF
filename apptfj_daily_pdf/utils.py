@@ -20,6 +20,7 @@ from InternalControl import cInternalControl
 #Heroku
 objControl=cInternalControl()
 download_dir=objControl.download_dir
+completeDownloadFolder=''
 
 def getDatesForSearch(strDate):
     #dd/mm/yyyy
@@ -112,16 +113,15 @@ def processRows(browser,row):
                 time.sleep(5)
                 pdfButton=browser.find_elements_by_xpath('//*[@id="dtRresul_data"]/tr['+str(row)+']/td['+str(col)+']')[0]
                 pdfButton.click()
-                #Check recursively if a file downloaded
-                bDownloaded=checkIfPDFisDownloaded(False)
+                #Wait some time until the file is downloaded
+                time.sleep(100)
                 #The file is downloaded rare, then just renaming it solves the issue
-                if bDownloaded:
+                for file in os.listdir(download_dir):
                     pdfDownloaded=True
-                    for file in os.listdir(download_dir):
-                        if objControl.heroku:
-                            os.rename(download_dir+'/'+file,download_dir+'/00000.pdf')
-                        else:
-                            os.rename('C:\\'+download_dir+'\\'+file,'C:\\'+download_dir+'\\00000.pdf')
+                    if objControl.heroku:
+                        os.rename(completeDownloadFolder+'/'+file,completeDownloadFolder+'/00000.pdf')
+                    else:
+                        os.rename(completeDownloadFolder+'\\'+file,completeDownloadFolder+'\\00000.pdf')
 
             else:
                 print('The pdf process is turned off now...')        
@@ -171,23 +171,14 @@ def processRows(browser,row):
     if (objControl.pdfOn):
         #The metadata and pdf content is inserted in the same table
         if pdfDownloaded==True:
-            processPDF(json_sentencia)   
-            for file in os.listdir(download_dir):
-                os.remove(download_dir+'/'+file)  
+            processPDF(json_sentencia)
+            for file in os.listdir(completeDownloadFolder):   
+                if objControl.heroku:
+                    os.remove(completeDownloadFolder+'/'+file)
+                else:
+                    os.remove(completeDownloadFolder+'\\'+file)
 
-
-def checkIfPDFisDownloaded(bRes):
-    rutaFolder=''
-    if objControl.heroku:
-        rutaFolder=objControl.rutaHeroku+'/'+objControl.download_dir
-    else:
-        rutaFolder='C:\\'+objControl.download_dir    
-    if os.listdir(rutaFolder):    
-        return True
-    else:
-        checkIfPDFisDownloaded(False)      
-
-
+                
 
 
                     
@@ -241,7 +232,7 @@ def processPDF(json_sentencia):
     This process already sets a list of 20 items (the nice limit in cassandra list)
     """
     lsContent=[]  
-    for file in os.listdir(download_dir): 
+    for file in os.listdir(completeDownloadFolder): 
         strFile=file.split('.')[1]
         if strFile=='PDF' or strFile=='pdf':
             strContent=readPDF(file) 
@@ -256,13 +247,20 @@ def insertPDFChunks(startPos,contador,secuencia,totalElements,lsContent,json_doc
     for i in range(startPos,totalElements):
         if contador<=20:
             json_documento['lspdfcontent'].append(lsContent[i])
-            contador=contador+1
+            contador+=1
         else:
-            currentSeq=secuencia=secuencia+1
+            currentSeq=secuencia+1
             json_documento['secuencia']=currentSeq
-            res=bd.insertPDF(json_documento) 
-            if res:
-                print('Chunk of pdf added')  
+            #Check if the current chunk exists
+            pdfname=json_documento['pdfname']
+            num_exp=json_documento['num_exp']
+            secuencia=str(json_documento['secuencia'])
+            query="select id from test.tbcourtdecisiontfjfa_pdf where pdfname='"+pdfname+"' and num_exp='"+num_exp+"' and secuencia="+secuencia+" ALLOW FILTERING"
+            resQuery=bd.getQuery(query)
+            if resQuery is None:
+                resInsert=bd.insertJSON(json_documento,tbcourtdecisiontfjfa_pdf) 
+                if resInsert:
+                    print('Chunk of pdf added')  
             insertPDFChunks(i,0,currentSeq,totalElements,lsContent,json_documento) 
     print('PDF COMPLETE')         
        
@@ -288,6 +286,13 @@ def readPyPDF(file):
 def returnChromeSettings():
     browser=''
     chromedriver_autoinstaller.install()
+    profile = {"plugins.plugins_list": [{"enabled": True, "name": "Chrome PDF Viewer"}], # Disable Chrome's PDF Viewer
+               "download.default_directory": completeDownloadFolder , 
+               "download.prompt_for_download": False,
+               "download.directory_upgrade": True,
+               "download.extensions_to_open": "applications/pdf",
+               "plugins.always_open_pdf_externally": True #It will not show PDF directly in chrome
+               }           
     if objControl.heroku:
         #Chrome configuration for heroku
         chrome_options= webdriver.ChromeOptions()
@@ -295,19 +300,11 @@ def returnChromeSettings():
         chrome_options.add_argument("--headless")
         chrome_options.add_argument("--disable-dev-shm-usage")
         chrome_options.add_argument("--no-sandbox")
-
+        chrome_options.add_experimental_option('prefs',profile)
         browser=webdriver.Chrome(executable_path=os.environ.get("CHROMEDRIVER_PATH"),chrome_options=chrome_options)
 
     else:
         options = Options()
-        profile = {"plugins.plugins_list": [{"enabled": True, "name": "Chrome PDF Viewer"}], # Disable Chrome's PDF Viewer
-               "download.default_directory": 'C:\\'+objControl.download_dir , 
-               "download.prompt_for_download": False,
-               "download.directory_upgrade": True,
-               "download.extensions_to_open": "applications/pdf",
-               "plugins.always_open_pdf_externally": True #It will not show PDF directly in chrome
-               }           
-
         options.add_experimental_option("prefs", profile)
         browser=webdriver.Chrome(options=options)  
 
@@ -318,24 +315,27 @@ def returnChromeSettings():
 def initialDownloadDirCheck():
     print('Checking if download folder exists...')
     directory_created=''
+    #Create directory depending if it's in heroku or not
     if objControl.heroku:
         isdir = os.path.isdir(objControl.rutaHeroku+'/'+download_dir)
         directory_created=objControl.rutaHeroku+'/'+download_dir
     else:
         isdir=os.path.isdir('C:\\'+download_dir)
-        directory_created='C:\\'+download_dir   
+        directory_created='C:\\'+download_dir 
+    #Set directory created 
+    global completeDownloadFolder   
+    completeDownloadFolder=directory_created   
+    #Create directory if it doesnt exist      
     if isdir==False:
         print('Creating download folder...')
-        if objControl.heroku:
-            os.mkdir(objControl.rutaHeroku+'/'+download_dir)  
-        else:
-            os.mkdir('C:\\'+download_dir)          
+        os.mkdir(completeDownloadFolder)  
         print('Download directory created...')
-    for file in os.listdir(directory_created):
+    #Dele files in folder    
+    for file in os.listdir(completeDownloadFolder):
         if objControl.heroku:
-            os.remove(directory_created+'/'+file)
+            os.remove(completeDownloadFolder+'/'+file)
         else:
-            os.remove(directory_created+'\\'+file)
+            os.remove(completeDownloadFolder+'\\'+file)
         print('Download folder empty...')   
 
 def devuelveElemento(xPath, browser):
