@@ -170,7 +170,16 @@ def processRows(browser,row):
     if (objControl.pdfOn):
         #The metadata and pdf content is inserted in the same table
         if pdfDownloaded==True:
-            processPDF(json_sentencia)
+            #Check if the pdf is already in database
+            pdfname=json_sentencia['pdfname']
+            num_exp=json_sentencia['num_exp']
+            query="select id from test.tbcourtdecisiontfjfa_pdf where pdfname='"+pdfname+"' and num_exp='"+num_exp+"' ALLOW FILTERING"
+            res=bd.getQuery(query)
+            if res:
+                print('Pdf: '+pdfname+' is already in database, going on with next pdf...')
+            else:    
+                processPDF(json_sentencia)
+                print('PDF done')
             for file in os.listdir(completeDownloadFolder):   
                 if objControl.heroku:
                     os.remove(completeDownloadFolder+'/'+file)
@@ -243,36 +252,27 @@ def processPDF(json_sentencia):
             print('Start wrapping text...') 
             lsContent=wrap(strContent,1000)  
             totalElements=len(lsContent)
-            insertPDFChunks(0,0,0,totalElements,lsContent,json_sentencia)       
-           
-             
-def insertPDFChunks(startPos,contador,secuencia,totalElements,lsContent,json_documento):
-    json_documento['lspdfcontent'].clear()
-    for i in range(startPos,totalElements):
-        if contador<=20:
-            json_documento['lspdfcontent'].append(lsContent[i])
-            contador+=1
-        else:
-            currentSeq=secuencia+1
-            json_documento['secuencia']=currentSeq
-            #Check if the current chunk exists
-            pdfname=json_documento['pdfname']
-            num_exp=json_documento['num_exp']
-            secuencia=str(json_documento['secuencia'])
-            query="select id from test.tbcourtdecisiontfjfa_pdf where pdfname='"+pdfname+"' and num_exp='"+num_exp+"' and secuencia="+secuencia+" ALLOW FILTERING"
-            resQuery=bd.getQuery(query)
-            if resQuery:
-                print('The chunk already exists')
-            else:    
-                #If the pdf name, expedient name and sequence doesn't exist, then create the UUID to insert
-                json_documento['id']=str(uuid.uuid4())
-                resInsert=bd.insertJSON(json_documento,'tbcourtdecisiontfjfa_pdf') 
-                if resInsert:
-                    print('Chunk of pdf added')  
-                    insertPDFChunks(i,0,currentSeq,totalElements,lsContent,json_documento) 
-    print('PDF COMPLETE')         
-       
+            for i in range(0,totalElements+1):
+                json_sentencia['lspdfcontent'].clear()
+                json_sentencia['lspdfcontent'].append(lsContent[i])
+                json_sentencia['secuencia']=i
+                #Check if the current chunk exists
+                pdfname=json_sentencia['pdfname']
+                num_exp=json_sentencia['num_exp']
+                secuencia=str(json_sentencia['secuencia'])
+                query="select id from test.tbcourtdecisiontfjfa_pdf where pdfname='"+pdfname+"' and num_exp='"+num_exp+"' and secuencia="+secuencia+" ALLOW FILTERING"
+                resQuery=bd.getQuery(query)
+                if resQuery:
+                    print('The chunk already exists')
+                else:    
+                    #If the pdf name, expedient name and sequence doesn't exist, then create the UUID to insert
+                    json_sentencia['id']=str(uuid.uuid4())
+                    resInsert=bd.insertJSON(json_sentencia,'tbcourtdecisiontfjfa_pdf') 
+                    if resInsert:
+                        print('Chunk of pdf added: '+str(i)+' of '+str(totalElements))  
                     
+                
+                           
 
 def readPyPDF(file):
     #This procedure produces a b'blabla' string, it has UTF-8
