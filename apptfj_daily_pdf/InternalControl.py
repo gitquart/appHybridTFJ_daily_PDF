@@ -1,7 +1,7 @@
 import os
 
 class cInternalControl(object):
-    idControl=0
+    idControl=9
     timeout=70
     heroku=True
     pdfOn=True
