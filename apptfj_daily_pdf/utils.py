@@ -114,7 +114,7 @@ def processRows(browser,row):
                 pdfButton=browser.find_elements_by_xpath('//*[@id="dtRresul_data"]/tr['+str(row)+']/td['+str(col)+']')[0]
                 pdfButton.click()
                 #Wait some time until the file is downloaded
-                time.sleep(15)
+                time.sleep(60)
                 #The file is downloaded rare, then just renaming it solves the issue
                 for file in os.listdir(completeDownloadFolder):
                     pdfDownloaded=True
@@ -178,8 +178,9 @@ def processRows(browser,row):
             if res:
                 print('Pdf: '+pdfname+' is already in database, going on with next pdf...')
             else:    
-                processPDF(json_sentencia)
-                print('PDF done')
+                res=processPDF(json_sentencia)
+                if res:
+                    print('PDF done')
             for file in os.listdir(completeDownloadFolder):   
                 if objControl.heroku:
                     os.remove(completeDownloadFolder+'/'+file)
@@ -250,26 +251,17 @@ def processPDF(json_sentencia):
         if strFile=='PDF' or strFile=='pdf':
             strContent=readPDF(file) 
             print('Start wrapping text...') 
-            lsContent=wrap(strContent,1000)  
+            lsContent=wrap(strContent,10000)  
             totalElements=len(lsContent)
-            for i in range(0,totalElements+1):
-                json_sentencia['lspdfcontent'].clear()
+            json_sentencia['lspdfcontent'].clear()
+            for i in range(0,totalElements):
                 json_sentencia['lspdfcontent'].append(lsContent[i])
-                json_sentencia['secuencia']=i
-                #Check if the current chunk exists
-                pdfname=json_sentencia['pdfname']
-                num_exp=json_sentencia['num_exp']
-                secuencia=str(json_sentencia['secuencia'])
-                query="select id from test.tbcourtdecisiontfjfa_pdf where pdfname='"+pdfname+"' and num_exp='"+num_exp+"' and secuencia="+secuencia+" ALLOW FILTERING"
-                resQuery=bd.getQuery(query)
-                if resQuery:
-                    print('The chunk already exists')
-                else:    
-                    #If the pdf name, expedient name and sequence doesn't exist, then create the UUID to insert
-                    json_sentencia['id']=str(uuid.uuid4())
-                    resInsert=bd.insertJSON(json_sentencia,'tbcourtdecisiontfjfa_pdf') 
-                    if resInsert:
-                        print('Chunk of pdf added: '+str(i)+' of '+str(totalElements))  
+
+            json_sentencia['id']=str(uuid.uuid4())
+            resInsert=bd.insertJSON(json_sentencia,'tbcourtdecisiontfjfa_pdf')
+            if resInsert:
+                return True  
+                    
                     
                 
                            
@@ -333,6 +325,7 @@ def initialDownloadDirCheck():
     #Set directory created 
     global completeDownloadFolder   
     completeDownloadFolder=directory_created   
+    print('The download folder is set on: ',completeDownloadFolder)
     #Create directory if it doesnt exist      
     if isdir==False:
         print('Creating download folder...')
