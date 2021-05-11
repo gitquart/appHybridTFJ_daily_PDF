@@ -180,7 +180,7 @@ def processRows(browser,row):
             else:    
                 res=processPDF(json_sentencia)
                 if res:
-                    print('PDF done')
+                    print('PDF done :',pdfname)
             for file in os.listdir(completeDownloadFolder):   
                 if objControl.heroku:
                     os.remove(completeDownloadFolder+'/'+file)
