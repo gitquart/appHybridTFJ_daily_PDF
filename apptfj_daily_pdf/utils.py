@@ -115,8 +115,8 @@ def processRows(browser,row):
                 pdfButton.click()
                 #Wait some time until the file is downloaded
                 timeToWaitPDF=300
-                time.sleep(timeToWaitPDF)
                 print('Wait for pdf: ',str(timeToWaitPDF),' secs')
+                time.sleep(timeToWaitPDF)
                 #The file is downloaded rare, then just renaming it solves the issue
                 for file in os.listdir(completeDownloadFolder):
                     pdfDownloaded=True
@@ -261,6 +261,7 @@ def processPDF(json_sentencia):
                 json_sentencia['lspdfcontent'].append(lsContent[i])
 
             json_sentencia['id']=str(uuid.uuid4())
+            print('Inserting PDF and metadata...')
             resInsert=bd.insertJSON(json_sentencia,'tbcourtdecisiontfjfa_pdf')
             if resInsert:
                 return True  
