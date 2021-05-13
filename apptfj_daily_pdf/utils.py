@@ -265,35 +265,41 @@ def processPDF(json_sentencia):
                     json_sentencia['lspdfcontent'].append(lsContent[i])
 
                 json_sentencia['id']=str(uuid.uuid4()) 
-                
-                
                 resInsert=bd.insertJSON(json_sentencia,'tbcourtdecisiontfjfa_pdf')
                 if resInsert:
                     return True     
             else:
-                sendChunkOfPDF(0,totalElements,20,lsContent,json_sentencia,1)
+                res=sendChunkOfPDF(0,totalElements,20,lsContent,json_sentencia,1)
+                if res:
+                    return True
                 
             #End of decision for Sending PDF    
                 
 
-
-            
-            
-                    
-                    
- def sendChunkOfPDF(start,stop,totalListAmount,lsContent,json_sentencia,secuencia):
+def sendChunkOfPDF(start,stop,totalListAmount,lsContent,json_sentencia,secuencia):
     #Group in list of 20 to lspdfcontent
+    json_sentencia['lspdfcontent'].clear()
     rangeAllowed=start+totalListAmount
+    bPartial=False
     if rangeAllowed<=stop:
+        bPartial=True
         for i in range(start,rangeAllowed):
-            json_sentencia['lspdfcontent'].append(lsContent[i])
-        json_sentencia['secuencia']=secuencia 
-        json_sentencia['id']=str(uuid.uuid4())   
+            json_sentencia['lspdfcontent'].append(lsContent[i])    
     else:
+        bPartial=False
         for i in range(start,stop):
             json_sentencia['lspdfcontent'].append(lsContent[i])
-        json_sentencia['secuencia']=secuencia
-        json_sentencia['id']=str(uuid.uuid4())
+            
+    json_sentencia['secuencia']=secuencia
+    json_sentencia['id']=str(uuid.uuid4())
+    resInsert=bd.insertJSON(json_sentencia,'tbcourtdecisiontfjfa_pdf')
+    if resInsert:
+        if bPartial:
+            print('Chunk added')
+            sendChunkOfPDF(rangeAllowed,stop,totalListAmount,lsContent,json_sentencia,secuencia+1)
+        else:    
+            print('Last chunk added')
+            return True
 
 
 
