@@ -260,18 +260,18 @@ def processPDF(json_sentencia):
             print('Total elements of pdf (list):',str(totalElements))
             json_sentencia['lspdfcontent'].clear()
             print('Inserting PDF and metadata...')
+            resInsert=''
             if totalElements<=100:
                 for i in range(0,totalElements):
                     json_sentencia['lspdfcontent'].append(lsContent[i])
 
                 json_sentencia['id']=str(uuid.uuid4()) 
-                resInsert=bd.insertJSON(json_sentencia,'tbcourtdecisiontfjfa_pdf')
-                if resInsert:
-                    return True     
+                resInsert=bd.insertJSON(json_sentencia,'tbcourtdecisiontfjfa_pdf')    
             else:
-                res=sendChunkOfPDF(0,totalElements,20,lsContent,json_sentencia,1)
-                if res:
-                    return True
+                resInsert=sendChunkOfPDF(0,totalElements,50,lsContent,json_sentencia,1)
+            
+            if resInsert:
+                return True
                 
             #End of decision for Sending PDF    
                 
@@ -281,7 +281,7 @@ def sendChunkOfPDF(start,stop,totalListAmount,lsContent,json_sentencia,secuencia
     json_sentencia['lspdfcontent'].clear()
     rangeAllowed=start+totalListAmount
     bPartial=False
-    if rangeAllowed<=stop:
+    if rangeAllowed<stop:
         bPartial=True
         for i in range(start,rangeAllowed):
             json_sentencia['lspdfcontent'].append(lsContent[i])    
@@ -295,10 +295,10 @@ def sendChunkOfPDF(start,stop,totalListAmount,lsContent,json_sentencia,secuencia
     resInsert=bd.insertJSON(json_sentencia,'tbcourtdecisiontfjfa_pdf')
     if resInsert:
         if bPartial:
-            print('Chunk added')
+            print('Chunk added :',str(start),' to ',str(rangeAllowed-1),' , secuencia:',str(secuencia))
             sendChunkOfPDF(rangeAllowed,stop,totalListAmount,lsContent,json_sentencia,secuencia+1)
         else:    
-            print('Last chunk added')
+            print('Last Chunk added :',str(start),' to ',str(stop-1),' , secuencia: ',str(secuencia))
             return True
 
 
