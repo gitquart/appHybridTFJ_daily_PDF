@@ -254,8 +254,9 @@ def processPDF(json_sentencia):
         if strFile=='PDF' or strFile=='pdf':
             strContent=readPDF(file) 
             print('Start wrapping text...') 
-            lsContent=wrap(strContent,10000)  
+            lsContent=wrap(strContent,100000)  
             totalElements=len(lsContent)
+            print('Total elements of pdf (list):',str(totalElements))
             json_sentencia['lspdfcontent'].clear()
             for i in range(0,totalElements):
                 json_sentencia['lspdfcontent'].append(lsContent[i])
