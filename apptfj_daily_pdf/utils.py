@@ -114,7 +114,9 @@ def processRows(browser,row):
                 pdfButton=browser.find_elements_by_xpath('//*[@id="dtRresul_data"]/tr['+str(row)+']/td['+str(col)+']')[0]
                 pdfButton.click()
                 #Wait some time until the file is downloaded
-                time.sleep(300)
+                timeToWaitPDF=300
+                time.sleep(timeToWaitPDF)
+                print('Wait for pdf: ',str(timeToWaitPDF),' secs')
                 #The file is downloaded rare, then just renaming it solves the issue
                 for file in os.listdir(completeDownloadFolder):
                     pdfDownloaded=True
@@ -180,7 +182,7 @@ def processRows(browser,row):
             else:    
                 res=processPDF(json_sentencia)
                 if res:
-                    print('PDF done :',pdfname,'--(Wait 10 seconds to recude write latency)--')
+                    print('PDF done :',pdfname,'--(Wait 10 seconds to reduce write latency)--')
                     time.sleep(10)
             for file in os.listdir(completeDownloadFolder):   
                 if objControl.heroku:
