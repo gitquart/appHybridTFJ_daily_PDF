@@ -180,7 +180,8 @@ def processRows(browser,row):
             else:    
                 res=processPDF(json_sentencia)
                 if res:
-                    print('PDF done :',pdfname)
+                    print('PDF done :',pdfname,'--(Wait 10 seconds to recude write latency)--')
+                    time.sleep(10)
             for file in os.listdir(completeDownloadFolder):   
                 if objControl.heroku:
                     os.remove(completeDownloadFolder+'/'+file)
