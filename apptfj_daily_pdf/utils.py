@@ -256,19 +256,48 @@ def processPDF(json_sentencia):
             print('Start wrapping text...') 
             lsContent=wrap(strContent,100000)  
             totalElements=len(lsContent)
+            #Start of decision for sending PDF
             print('Total elements of pdf (list):',str(totalElements))
             json_sentencia['lspdfcontent'].clear()
-            for i in range(0,totalElements):
-                json_sentencia['lspdfcontent'].append(lsContent[i])
-
-            json_sentencia['id']=str(uuid.uuid4())
             print('Inserting PDF and metadata...')
-            resInsert=bd.insertJSON(json_sentencia,'tbcourtdecisiontfjfa_pdf')
-            if resInsert:
-                return True  
-                    
-                    
+            if totalElements<=100:
+                for i in range(0,totalElements):
+                    json_sentencia['lspdfcontent'].append(lsContent[i])
+
+                json_sentencia['id']=str(uuid.uuid4()) 
                 
+                
+                resInsert=bd.insertJSON(json_sentencia,'tbcourtdecisiontfjfa_pdf')
+                if resInsert:
+                    return True     
+            else:
+                sendChunkOfPDF(0,totalElements,20,lsContent,json_sentencia,1)
+                
+            #End of decision for Sending PDF    
+                
+
+
+            
+            
+                    
+                    
+ def sendChunkOfPDF(start,stop,totalListAmount,lsContent,json_sentencia,secuencia):
+    #Group in list of 20 to lspdfcontent
+    rangeAllowed=start+totalListAmount
+    if rangeAllowed<=stop:
+        for i in range(start,rangeAllowed):
+            json_sentencia['lspdfcontent'].append(lsContent[i])
+        json_sentencia['secuencia']=secuencia 
+        json_sentencia['id']=str(uuid.uuid4())   
+    else:
+        for i in range(start,stop):
+            json_sentencia['lspdfcontent'].append(lsContent[i])
+        json_sentencia['secuencia']=secuencia
+        json_sentencia['id']=str(uuid.uuid4())
+
+
+
+
                            
 
 def readPyPDF(file):

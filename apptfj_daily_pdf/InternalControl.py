@@ -3,7 +3,7 @@ import os
 class cInternalControl(object):
     idControl=9
     timeout=70
-    heroku=True
+    heroku=False
     pdfOn=True
     version='apptfj_daily_pdf'
     download_dir='Download_'+version
