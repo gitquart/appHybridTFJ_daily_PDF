@@ -114,7 +114,7 @@ def processRows(browser,row):
                 pdfButton=browser.find_elements_by_xpath('//*[@id="dtRresul_data"]/tr['+str(row)+']/td['+str(col)+']')[0]
                 pdfButton.click()
                 #Wait some time until the file is downloaded
-                time.sleep(60)
+                time.sleep(300)
                 #The file is downloaded rare, then just renaming it solves the issue
                 for file in os.listdir(completeDownloadFolder):
                     pdfDownloaded=True
