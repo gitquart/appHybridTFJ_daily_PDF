@@ -15,7 +15,7 @@ def returnCluster():
     objCC=CassandraConnection()
     cloud_config={}
     secure_connect_zip=''
-    secure_zip='secure-connect-dbtest_serverless.zip'
+    secure_zip='secure-connect-dbquart.zip'
     if objControl.heroku:
         secure_connect_zip=objControl.rutaHeroku+'/'+secure_zip
     else:
